@@ -126,6 +126,7 @@ class LiveStatusLogStoreMongoDB(BaseModule):
             elif maxmatch.group(2) == 'y':
                 self.max_logs_age = int(maxmatch.group(1)) * 365
         self.use_aggressive_sql = (getattr(modconf, 'use_aggressive_sql', '1') == '1')
+        self.log_invalid_line = to_bool(getattr(modconf, 'log_invalid_line', 'False'))
         # This stack is used to create a full-blown select-statement
         self.mongo_filter_stack = LiveStatusMongoStack()
         # This stack is used to create a minimal select-statement which
@@ -243,7 +244,8 @@ class LiveStatusLogStoreMongoDB(BaseModule):
                 logger.error("[LogStoreMongoDB] Databased error occurred: %s" % exp)
             # FIXME need access to this #self.livestatus.count_event('log_message')
         else:
-            logger.info("[LogStoreMongoDB] This line is invalid: %s" % line)
+            if self.log_invalid_line:
+                logger.info("[LogStoreMongoDB] This line is invalid: %s" % line)
 
 
     def add_filter(self, operator, attribute, reference):
